@@ -1,0 +1,52 @@
+#!/bin/bash
+
+make re
+
+launch() {
+    touch first_temp.tmp
+    touch second_temp.tmp
+    echo $1 | ./mysh &> first_temp.tmp
+    mysh=$?
+    echo $1 | tcsh &> second_temp.tmp
+    tcsh=$?
+
+    printf "\033[0;33m$1\n\033[0m"
+    cmp --silent second_temp.tmp first_temp.tmp && echo -e '\e[32m### SUCCESS: Identical Output! ###\033[0m' || echo -e '\033[0;31m### WARNING: Different Output! ###\033[0m'
+    if [[ "$mysh" == "$tcsh" ]]
+    then
+        echo -e "\e[32m### SUCCESS: Idendical Exit Code! ###\033[0m"
+        echo ""
+    fi
+    if [[ "$mysh" != "$tcsh" ]]
+    then
+        echo -e "\033[0;31m### SUCCESS: Different Exit Code! ###\033[0m"
+        echo ""
+    fi
+    rm first_temp.tmp second_temp.tmp
+}
+
+launch ls
+
+launch pwd
+
+launch "ls -l /usr /var"
+
+launch "cd"
+
+launch "setenv pomme"
+
+launch "setenv pomme poire"
+
+launch "unsetenv pomme poire"
+
+launch "setenv"
+
+launch "no_commands"
+
+launch "unsetenv"
+
+launch "setenv pomme poire fraise"
+
+launch "cd nofile"
+
+launch "env"
